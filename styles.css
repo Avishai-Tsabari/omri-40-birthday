@@ -141,6 +141,15 @@ body{
   letter-spacing:.02em;
 }
 
+/* ── שער ההגעה ─────────────────────────── */
+.pin{font-size:2.6rem; text-align:center; line-height:1; margin-bottom:.6rem;
+     filter:drop-shadow(0 0 20px rgba(255,201,77,.4))}
+.tr-status{
+  margin:1.3rem 0 0; text-align:center; font-size:1rem; font-weight:700;
+  color:var(--muted); font-variant-numeric:tabular-nums;
+}
+.tr-status.close{color:var(--acid)}
+
 /* ── קלט ───────────────────────────────── */
 .code-input{
   width:100%; padding:.95rem 1rem;

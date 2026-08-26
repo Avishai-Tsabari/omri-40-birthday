@@ -21,6 +21,8 @@
     gLine1: $('g-line1'), gLine2: $('g-line2'), gLine3: $('g-line3'),
     screenCountdown: $('screen-countdown'), cdLabel: $('cd-label'),
     cdGrid: $('cd-grid'), cdOpen: $('cd-open'), cdSkip: $('cd-skip'),
+    screenTravel: $('screen-travel'), trTitle: $('tr-title'), trBody: $('tr-body'),
+    trStatus: $('tr-status'), trOpen: $('tr-open'), trManual: $('tr-manual'),
     screenCode: $('screen-code'), form: $('code-form'), input: $('code-input'),
     submit: $('submit-btn'), error: $('error'),
     screenVideo: $('screen-video'), villainTag: $('villain-tag'), stage: $('stage'),
@@ -104,7 +106,7 @@
   }
 
   /* ── מסכים ───────────────────────────────────────────────── */
-  var SCREENS = ['screenGreeting', 'screenCountdown', 'screenCode',
+  var SCREENS = ['screenGreeting', 'screenCountdown', 'screenTravel', 'screenCode',
                  'screenVideo', 'screenNext', 'screenFinale'];
 
   var PRE_GAME = { screenGreeting: 1, screenCountdown: 1 };
@@ -117,6 +119,7 @@
     el.foot.classList.toggle('hidden', !!PRE_GAME[name]);
     if (name !== 'screenVideo') stopVideo();
     if (name !== 'screenCountdown') stopCountdown();
+    if (name !== 'screenTravel') stopWatching();
     window.scrollTo(0, 0);
   }
 
@@ -237,6 +240,92 @@
     renderCountdown();
     stopCountdown();
     cdTimer = setInterval(renderCountdown, 1000);
+  }
+
+  /* ── שער ההגעה לפארק ─────────────────────────────────────────
+     השער היחיד שלא נפתח בקוד. עומרי צופה בסרטון הראשון מהבית,
+     נוסע, וכשהוא בתוך הרדיוס הסרטון השני נפתח.
+
+     כלל ברזל: הגיאו הוא תוספת, לא תנאי. אם ההרשאה נדחתה, אם אין
+     קליטה, או אם פשוט עברו manualAfterSeconds — מופיע כפתור ידני.
+     עומרי לא אמור להיתקע ברחוב בגלל GPS.                        */
+  var watchId = null, manualTimer = null;
+
+  function stopWatching() {
+    if (watchId !== null && navigator.geolocation) {
+      try { navigator.geolocation.clearWatch(watchId); } catch (e) {}
+    }
+    watchId = null;
+    if (manualTimer) { clearTimeout(manualTimer); manualTimer = null; }
+  }
+
+  /* מרחק בין שתי נקודות על פני כדור הארץ, במטרים */
+  function metersBetween(lat1, lng1, lat2, lng2) {
+    var R = 6371000, rad = Math.PI / 180;
+    var dLat = (lat2 - lat1) * rad, dLng = (lng2 - lng1) * rad;
+    var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(lat1 * rad) * Math.cos(lat2 * rad) *
+            Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
+
+  function humanDistance(m) {
+    return m >= 1000 ? (m / 1000).toFixed(1) + ' ק\"מ' : Math.round(m) + ' מטר';
+  }
+
+  function showManual() {
+    el.trManual.classList.remove('hidden');
+  }
+
+  function arrivedAtPark(stop) {
+    stopWatching();
+    var a = CONFIG.arrival;
+    el.trStatus.textContent = a.arrived;
+    el.trStatus.classList.add('close');
+    el.trOpen.classList.remove('hidden');
+    el.trManual.classList.add('hidden');
+    // הפתיחה דורשת נגיעה — גם לדרמה וגם כדי שהדפדפן ירשה קול
+    el.trOpen.onclick = function () {
+      var i = stops.indexOf(stop);
+      if (i === state.unlocked) { state.unlocked = i + 1; save(); renderProgress(); }
+      go('#/stop/' + (i + 1));
+    };
+  }
+
+  function runTravel(stop) {
+    var a = CONFIG.arrival;
+    el.trTitle.textContent = a.title;
+    el.trBody.textContent = a.body;
+    el.trStatus.textContent = a.searching;
+    el.trStatus.classList.remove('close');
+    el.trOpen.textContent = a.open;
+    el.trOpen.classList.add('hidden');
+    el.trManual.textContent = a.manualLabel;
+    el.trManual.classList.add('hidden');
+    el.trManual.onclick = function () { arrivedAtPark(stop); };
+    show('screenTravel');
+
+    stopWatching();
+    manualTimer = setTimeout(showManual, (a.manualAfterSeconds || 45) * 1000);
+
+    if (!navigator.geolocation) {
+      el.trStatus.textContent = a.denied;
+      showManual();
+      return;
+    }
+
+    watchId = navigator.geolocation.watchPosition(
+      function (pos) {
+        var d = metersBetween(pos.coords.latitude, pos.coords.longitude, a.lat, a.lng);
+        if (d <= a.radiusMeters) { arrivedAtPark(stop); return; }
+        el.trStatus.textContent = a.distance + ' ' + humanDistance(d);
+      },
+      function () {
+        el.trStatus.textContent = a.denied;
+        showManual();
+      },
+      { enableHighAccuracy: true, maximumAge: 5000, timeout: 20000 }
+    );
   }
 
   /* ── סרטון ───────────────────────────────────────────────── */
@@ -391,7 +480,8 @@
     // מותר לפתוח רק את התחנה הנוכחית, או לחזור על תחנה שכבר נפתחה.
     // ניחוש של קוד עתידי נכשל — אי אפשר לקפוץ לסוף.
     for (var i = 0; i <= state.unlocked && i < stops.length; i++) {
-      if (stops[i].auto) continue; // סרטון הפתיחה נפתח לפי שעון, לא לפי קוד
+      // הפתיחה נפתחת לפי שעון וההגעה לפי מיקום — לא בהקלדה
+      if (stops[i].auto || stops[i].geo) continue;
       if (stopMatchesInput(stops[i], value)) {
         if (i === state.unlocked) {
           state.unlocked = i + 1;
@@ -439,6 +529,7 @@
     if (hash === '#/greeting')  return { kind: 'greeting' };
     if (hash === '#/countdown') return { kind: 'countdown' };
     if (hash === '#/code')      return { kind: 'code' };
+    if (hash === '#/travel')    return { kind: 'travel' };
     if (hash === '#/wrong')     return { kind: 'wrong' };
     if (hash === '#/finale')    return { kind: 'finale' };
     if ((m = /^#\/stop\/(\d+)$/.exec(hash))) return { kind: 'stop', i: +m[1] - 1 };
@@ -448,13 +539,23 @@
 
   function seen(i) { return i >= 0 && i < state.unlocked; }
 
+  /* האם התחנה שבתור נפתחת לפי מיקום */
+  function waitingOnGeo() {
+    var nextStop = stops[state.unlocked];
+    return !!(nextStop && nextStop.geo);
+  }
+
   function allowed(route) {
     if (!route) return false;
     switch (route.kind) {
       case 'greeting':  return true;
       case 'countdown': return state.greeted;
-      case 'code':      return state.unlocked > 0;
-      case 'wrong':     return state.unlocked > 0;
+      // מסך הקוד שייך רק לתחנה שנפתחת בקוד. בזמן שהוא בדרך לפארק
+      // אין שם מה לעשות, ולתת לו לנחות שם רק יבלבל אותו.
+      case 'code':      return state.unlocked > 0 && !waitingOnGeo();
+      // השער נגיש רק כשהתחנה שבתור היא באמת תחנת-מיקום
+      case 'travel':    return waitingOnGeo();
+      case 'wrong':     return state.unlocked > 0 && !waitingOnGeo();
       case 'stop':      return seen(route.i);
       case 'next':      return seen(route.i) && !stops[route.i].finale;
       case 'finale':    return state.unlocked >= stops.length;
@@ -467,6 +568,8 @@
   function currentRoute() {
     if (!state.greeted) return '#/greeting';
     if (state.unlocked === 0) return '#/countdown';
+    var nextStop = stops[state.unlocked];
+    if (nextStop && nextStop.geo) return '#/travel';
     return '#/code';
   }
 
@@ -487,6 +590,7 @@
       case 'greeting':  runGreeting(); break;
       case 'countdown': runCountdown(); break;
       case 'code':      setMapLink(null); show('screenCode'); break;
+      case 'travel':    setMapLink(null); runTravel(stops[state.unlocked]); break;
       case 'stop':      setMapLink(null); openVideo(stops[route.i]); break;
       case 'next':      renderNext(stops[route.i]); break;
       case 'finale':    renderFinale(stops[stops.length - 1]); break;
@@ -660,6 +764,8 @@
     });
 
     el.continueBtn.addEventListener('click', function () {
+      var nextStop = stops[state.unlocked];
+      if (nextStop && nextStop.geo) { go('#/travel'); return; }
       go('#/code');
       el.input.focus();
     });

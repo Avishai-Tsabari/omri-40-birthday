@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=17">
+<link rel="stylesheet" href="styles.css?v=19">
 </head>
 <body>
 
@@ -38,6 +38,16 @@
     <div class="cd-grid" id="cd-grid"></div>
     <button class="btn hidden" id="cd-open" type="button"></button>
     <button class="btn ghost hidden" id="cd-skip" type="button"></button>
+  </section>
+
+  <!-- ── שער ההגעה לפארק (גיאולוקציה) ────────────────── -->
+  <section class="card hidden" id="screen-travel">
+    <div class="pin" aria-hidden="true">📍</div>
+    <h2 class="place" id="tr-title"></h2>
+    <p class="speech" id="tr-body"></p>
+    <p class="tr-status" id="tr-status" aria-live="polite"></p>
+    <button class="btn hidden" id="tr-open" type="button"></button>
+    <button class="btn ghost hidden" id="tr-manual" type="button"></button>
   </section>
 
   <!-- ── מסך הזנת קוד ────────────────────────────────── -->
@@ -106,7 +116,7 @@
   </div>
 </div>
 
-<script src="config.js?v=17"></script>
-<script src="app.js?v=17"></script>
+<script src="config.js?v=19"></script>
+<script src="app.js?v=19"></script>
 </body>
 </html>
