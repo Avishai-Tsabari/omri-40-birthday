@@ -252,7 +252,8 @@ const CONFIG = {
     {
       id: 's5',
       finale: true,
-      codes: ["ג'פאר2024", 'גפאר', 'jafar'],
+      // ג'פאר נשאר כשם נרדף למקרה שהודפס קוד ישן. אין התנגשות.
+      codes: ['באטמן2024', 'באטמן', 'batman', "ג'פאר2024", 'גפאר', 'jafar'],
       villain: 'באטמן',
       video: 'videos/a7.mp4',
       next: {
