@@ -32,7 +32,8 @@
     finaleSpeech: $('finale-speech'), finaleHint: $('finale-hint'),
     gift: $('gift'), giftHeadline: $('gift-headline'), giftBody: $('gift-body'),
     giftImage: $('gift-image'),
-    replayBtn: $('replay-btn'), sheetTitle: $('sheet-title'),
+    replayBtn: $('replay-btn'), mapLink: $('map-link'), foot: $('foot'),
+    sheetTitle: $('sheet-title'),
     sheet: $('sheet'), sheetList: $('sheet-list'), sheetClose: $('sheet-close')
   };
 
@@ -107,6 +108,8 @@
     SCREENS.forEach(function (k) { el[k].classList.toggle('hidden', k !== name); });
     // לפני שהמשחק מתחיל אין טעם להראות כמה תחנות יש — זה מספר לו יותר מדי
     el.progress.classList.toggle('hidden', !!PRE_GAME[name]);
+    // הכלים בתחתית שייכים למשחק עצמו, לא לברכה ולספירה
+    el.foot.classList.toggle('hidden', !!PRE_GAME[name]);
     if (name !== 'screenVideo') stopVideo();
     if (name !== 'screenCountdown') stopCountdown();
     window.scrollTo(0, 0);
@@ -593,6 +596,13 @@
     el.input.placeholder = CONFIG.ui.codePlaceholder;
     el.submit.textContent = CONFIG.ui.submit;
     el.replayBtn.textContent = CONFIG.ui.replay;
+
+    var map = CONFIG.map || {};
+    if (map.url) {
+      el.mapLink.href = map.url;
+      el.mapLink.textContent = map.label || 'מפה';
+      el.mapLink.hidden = false;
+    }
 
     /* ?reset=1 מאפס הכל וחוזר לברכה — קיצור לבדיקות.
        מנקים את הכתובת מיד אחרי, כדי שרענון לא יאפס שוב באמצע המשחק. */
