@@ -331,6 +331,7 @@
   /* ── חשיפת התחנה הבאה ──────────────────────────────────────
      שתי הפונקציות האלה רק מציירות. הניווט נעשה ב-go(). */
   function renderFinale(stop) {
+      setMapLink(stop.next.mapUrl);
       el.finalePlace.textContent = stop.next.place;
       el.finaleSpeech.textContent = stop.next.text;
       el.finaleHint.textContent = stop.next.hint || '';
@@ -348,7 +349,19 @@
       show('screenFinale');
   }
 
+  /* מפה: ברירת מחדל מ-CONFIG.map, אבל תחנה יכולה לגבור עם next.mapUrl —
+     בסוף המסלול זו כבר לא מפת הפארק אלא הדרך למסעדה. */
+  function setMapLink(url) {
+    var map = CONFIG.map || {};
+    var href = url || map.url;
+    if (!href) { el.mapLink.hidden = true; return; }
+    el.mapLink.href = href;
+    el.mapLink.textContent = map.label || 'מפה';
+    el.mapLink.hidden = false;
+  }
+
   function renderNext(stop) {
+    setMapLink(stop.next.mapUrl);
     el.nextLabel.textContent = CONFIG.ui.nextLabel;
     el.place.textContent = stop.next.place;
     el.speech.textContent = stop.next.text;
@@ -469,8 +482,8 @@
     switch (route.kind) {
       case 'greeting':  runGreeting(); break;
       case 'countdown': runCountdown(); break;
-      case 'code':      show('screenCode'); break;
-      case 'stop':      openVideo(stops[route.i]); break;
+      case 'code':      setMapLink(null); show('screenCode'); break;
+      case 'stop':      setMapLink(null); openVideo(stops[route.i]); break;
       case 'next':      renderNext(stops[route.i]); break;
       case 'finale':    renderFinale(stops[stops.length - 1]); break;
       case 'wrong':     openStrikeVideo(); break;
@@ -602,12 +615,7 @@
     el.submit.textContent = CONFIG.ui.submit;
     el.replayBtn.textContent = CONFIG.ui.replay;
 
-    var map = CONFIG.map || {};
-    if (map.url) {
-      el.mapLink.href = map.url;
-      el.mapLink.textContent = map.label || 'מפה';
-      el.mapLink.hidden = false;
-    }
+    setMapLink(null);
 
     /* ?skip=1 מקדים את שעת ההתחלה, כך שהספירה כבר "בשלה" והכפתור
        מופיע מיד. לבדיקות בלבד. הפרמטר נשאר בכתובת בכוונה, כדי
