@@ -288,3 +288,30 @@ body{
 @media (prefers-reduced-motion:reduce){
   *{animation:none !important; transition:none !important}
 }
+
+/* ── כפתור המוזיקה ──────────────────────────────────────────
+   מופיע רק כשהדפדפן חסם ניגון אוטומטי. ממוקם fixed ומחוץ
+   לכרטיס הברכה, כדי שנגיעה בו לא תיחשב כדילוג על הברכה. */
+.music-btn {
+  position: fixed;
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  left: calc(16px + env(safe-area-inset-left));
+  z-index: 40;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,.18);
+  background: rgba(255,255,255,.08);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  animation: musicPulse 2s ease-in-out infinite;
+}
+.music-btn:active { transform: scale(.94); }
+
+@keyframes musicPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255,255,255,.18); }
+  50%      { box-shadow: 0 0 0 10px rgba(255,255,255,0); }
+}

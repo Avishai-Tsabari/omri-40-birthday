@@ -16,6 +16,7 @@
 
   var el = {
     title: $('title'), subtitle: $('subtitle'), progress: $('progress'),
+    musicBtn: $('music-btn'),
     screenGreeting: $('screen-greeting'), confetti: $('confetti'),
     gHello: $('g-hello'), gBig: $('g-big'),
     gLine1: $('g-line1'), gLine2: $('g-line2'), gLine3: $('g-line3'),
@@ -111,6 +112,61 @@
 
   var PRE_GAME = { screenGreeting: 1, screenCountdown: 1 };
 
+  /* ── מוזיקת רקע ──────────────────────────────────────────────
+     רצה בדיוק על המסכים שלפני המשחק, ונעצרת ברגע שיש וידאו —
+     שני מקורות קול במקביל זה בלגן. */
+  var music = null, musicWanted = false, gestureArmed = false;
+
+  function musicEl() {
+    if (music) return music;
+    var m = CONFIG.music;
+    if (!m || !m.src) return null;
+    music = new Audio(m.src);
+    music.loop = true;
+    music.preload = 'auto';
+    music.volume = typeof m.volume === 'number' ? m.volume : 1;
+    return music;
+  }
+
+  /* iOS לא מנגן קול בלי מחווה של המשתמש. play() מחזיר Promise
+     שנדחה במקרה כזה — ואז נתלים על הנגיעה הבאה, איפה שתהיה. */
+  function musicTry() {
+    var a = musicEl();
+    if (!a || !musicWanted) return;
+    var p = a.play();
+    if (p && p.catch) p.catch(armGesture);
+  }
+
+  function armGesture() {
+    if (!musicWanted) return;
+    el.musicBtn.classList.remove('hidden');
+    if (gestureArmed) return;
+    gestureArmed = true;
+    var once = function () {
+      document.removeEventListener('pointerdown', once, true);
+      gestureArmed = false;
+      if (!musicWanted || !music || !music.paused) return;
+      var p = music.play();
+      if (p && p.then) p.then(hideMusicBtn, armGesture);
+      else hideMusicBtn();
+    };
+    document.addEventListener('pointerdown', once, true);
+  }
+
+  function hideMusicBtn() { el.musicBtn.classList.add('hidden'); }
+
+  function musicOn() {
+    if (musicWanted) return;   // כבר מנגן — לא לאתחל מחדש במעבר מסך
+    musicWanted = true;
+    musicTry();
+  }
+
+  function musicOff() {
+    musicWanted = false;
+    hideMusicBtn();
+    if (music) music.pause();
+  }
+
   function show(name) {
     SCREENS.forEach(function (k) { el[k].classList.toggle('hidden', k !== name); });
     // לפני שהמשחק מתחיל אין טעם להראות כמה תחנות יש — זה מספר לו יותר מדי
@@ -120,6 +176,7 @@
     if (name !== 'screenVideo') stopVideo();
     if (name !== 'screenCountdown') stopCountdown();
     if (name !== 'screenTravel') stopWatching();
+    if (PRE_GAME[name]) musicOn(); else musicOff();
     window.scrollTo(0, 0);
   }
 
@@ -771,6 +828,18 @@
       if (nextStop && nextStop.geo) { go('#/travel'); return; }
       go('#/code');
       el.input.focus();
+    });
+
+    el.musicBtn.title = (CONFIG.music && CONFIG.music.hint) || '';
+    el.musicBtn.addEventListener('click', function (e) {
+      // הכפתור יושב מחוץ לכרטיס הברכה, אבל עדיין עוצרים —
+      // נגיעה כאן היא בקשה למוזיקה, לא דילוג קדימה.
+      e.stopPropagation();
+      musicWanted = true;
+      var a = musicEl();
+      if (!a) return;
+      var p = a.play();
+      if (p && p.then) p.then(hideMusicBtn, function () {}); else hideMusicBtn();
     });
 
     el.replayBtn.addEventListener('click', function () { openSheet('replay'); });
