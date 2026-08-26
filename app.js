@@ -20,7 +20,7 @@
     gHello: $('g-hello'), gBig: $('g-big'),
     gLine1: $('g-line1'), gLine2: $('g-line2'), gLine3: $('g-line3'),
     screenCountdown: $('screen-countdown'), cdLabel: $('cd-label'),
-    cdGrid: $('cd-grid'), cdOpen: $('cd-open'),
+    cdGrid: $('cd-grid'), cdOpen: $('cd-open'), cdSkip: $('cd-skip'),
     screenCode: $('screen-code'), form: $('code-form'), input: $('code-input'),
     submit: $('submit-btn'), error: $('error'),
     screenVideo: $('screen-video'), villainTag: $('villain-tag'), stage: $('stage'),
@@ -209,6 +209,7 @@
       el.cdGrid.classList.add('cd-ready');
       el.cdOpen.textContent = CONFIG.countdown.open;
       el.cdOpen.classList.remove('hidden');
+      el.cdSkip.classList.add('hidden');   // כבר אין על מה לדלג
       return;
     }
 
@@ -229,6 +230,9 @@
     el.cdLabel.textContent = CONFIG.countdown.label;
     el.cdGrid.classList.remove('cd-ready');
     el.cdOpen.classList.add('hidden');
+    // ⚠️ זמני: כפתור דילוג גלוי לבדיקות. נשלט מ-CONFIG.countdown.showSkipButton
+    el.cdSkip.textContent = CONFIG.countdown.skipLabel || 'דלג';
+    el.cdSkip.classList.toggle('hidden', !CONFIG.countdown.showSkipButton);
     show('screenCountdown');
     renderCountdown();
     stopCountdown();
@@ -640,6 +644,11 @@
 
     el.form.addEventListener('submit', handleSubmit);
     el.input.addEventListener('input', function () { el.error.textContent = ''; });
+
+    el.cdSkip.addEventListener('click', function () {
+      CONFIG.countdown.startsAt = '1970-01-01T00:00:00+03:00';
+      renderCountdown();
+    });
 
     el.cdOpen.addEventListener('click', function () {
       if (state.unlocked === 0) {
