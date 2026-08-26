@@ -155,9 +155,16 @@
     if (!resume) { switching = false; return; }
     var go = function () {
       music.removeEventListener('canplay', go);
+      // ייתכן שבינתיים הוא כבר יצא מהספירה אל הסרטון הראשון —
+      // ואז מוזיקה שמתחילה כאן הייתה מתנגנת מעל הגמל.
+      if (!onScreen || !musicPref()) { switching = false; return; }
       musicPlay();
     };
     music.addEventListener('canplay', go);
+    music.addEventListener('error', function drop() {
+      music.removeEventListener('error', drop);
+      music.removeEventListener('canplay', go);
+    });
   }
 
   /* טוענים מראש רק את השיר הבא, ורק אחרי שהנוכחי כבר מנגן. */
@@ -229,7 +236,11 @@
     paintMusicBtn();
     if (gestureArmed) return;
     gestureArmed = true;
-    var once = function () {
+    var once = function (e) {
+      // נגיעה על כפתור המוזיקה שייכת ל-musicToggle. אם נדליק כאן,
+      // ה-click שאחרי יראה מוזיקה מנגנת ויכבה אותה מיד — והכפתור
+      // ייראה מת בנגיעה הראשונה. יוצאים בלי לפרק את המאזין.
+      if (e && el.musicBtn.contains(e.target)) return;
       document.removeEventListener('pointerdown', once, true);
       gestureArmed = false;
       if (!onScreen || !musicPref() || !music || !music.paused) return;
@@ -252,6 +263,13 @@
     onScreen = false;
     el.musicBtn.classList.add('hidden');
     if (music) music.pause();
+  }
+
+  /* עומרי פותח את הלינק בבוקר והספירה רצה שעות. iOS עוצר אודיו
+     כשהמסך ננעל ולא מחזיר לבד — אז מנסים שוב כשהוא חוזר למסך. */
+  function musicResume() {
+    if (document.hidden || !onScreen || !musicPref()) return;
+    if (music && music.paused) musicPlay();
   }
 
   function musicToggle() {
@@ -314,12 +332,14 @@
     buildConfetti();
     show('screenGreeting');
 
-    var done = function () {
+    var done = function (ev) {
       if (!greetTimer) return;
       /* ב-iOS אין קול עד הנגיעה הראשונה. אם הנגיעה הזו היא שהדליקה
          את המוזיקה — היא לא מדלגת גם על הברכה, אחרת השיר היה מתחיל
-         בדיוק ברגע שהמסך שאמור להתלוות אליו נעלם. */
-      if (new Date().getTime() - lastMusicGesture < 600) return;
+         בדיוק ברגע שהמסך שאמור להתלוות אליו נעלם.
+         ev קיים רק בנגיעה. הטיימר קורא בלי ארגומנטים, ולכן הוא
+         תמיד מתקדם — אחרת נגיעה בשנייה העשירית הייתה תוקעת אותו. */
+      if (ev && new Date().getTime() - lastMusicGesture < 600) return;
       clearTimeout(greetTimer);
       greetTimer = null;
       el.screenGreeting.removeEventListener('click', done);
@@ -949,6 +969,8 @@
     });
 
     wireLongPress(el.title, function () { openSheet('operator'); });
+
+    document.addEventListener('visibilitychange', musicResume);
 
     window.addEventListener('popstate', function () { applyRoute(0, false); });
     window.addEventListener('hashchange', function () { applyRoute(0, false); });
