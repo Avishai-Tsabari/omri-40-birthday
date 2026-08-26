@@ -235,7 +235,7 @@
     el.cdOpen.classList.add('hidden');
     // ⚠️ זמני: כפתור דילוג גלוי לבדיקות. נשלט מ-CONFIG.countdown.showSkipButton
     el.cdSkip.textContent = CONFIG.countdown.skipLabel || 'דלג';
-    el.cdSkip.classList.toggle('hidden', !CONFIG.countdown.showSkipButton);
+    el.cdSkip.classList.toggle('hidden', !CONFIG.testMode);
     show('screenCountdown');
     renderCountdown();
     stopCountdown();
@@ -306,7 +306,8 @@
     show('screenTravel');
 
     stopWatching();
-    manualTimer = setTimeout(showManual, (a.manualAfterSeconds || 45) * 1000);
+    if (CONFIG.testMode) showManual();
+    else manualTimer = setTimeout(showManual, (a.manualAfterSeconds || 45) * 1000);
 
     if (!navigator.geolocation) {
       el.trStatus.textContent = a.denied;
@@ -459,6 +460,7 @@
     el.place.textContent = stop.next.place;
     el.speech.textContent = stop.next.text;
     el.hint.textContent = stop.next.hint || '';
+    el.continueBtn.textContent = stop.next.continueLabel || CONFIG.ui.continueDefault;
     show('screenNext');
   }
 
