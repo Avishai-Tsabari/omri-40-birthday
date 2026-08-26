@@ -146,7 +146,7 @@ const CONFIG = {
       // auto: התחנה הזו לא דורשת קוד — היא נפתחת לבד כשהספירה נגמרת
       auto: true,
       codes: ['גמל', 'camel'],
-      villain: '',
+      villain: 'גמלללל',
       video: 'videos/a1.mp4',
       next: {
         place: 'פארק שרונה',
