@@ -154,7 +154,7 @@ const CONFIG = {
       // geo: נפתחת לפי מיקום, לא בקוד ולא בשעון
       geo: true,
       codes: ['שרונה', 'sarona'],
-      villain: '',
+      villain: 'שיר חאן',
       video: 'videos/a2.mp4',
       next: {
         place: 'רחבת מתקני הספורט',
