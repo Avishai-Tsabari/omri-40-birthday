@@ -114,8 +114,20 @@
 
   /* ── מוזיקת רקע ──────────────────────────────────────────────
      רצה בדיוק על המסכים שלפני המשחק, ונעצרת ברגע שיש וידאו —
-     שני מקורות קול במקביל זה בלגן. */
-  var music = null, musicWanted = false, gestureArmed = false;
+     שני מקורות קול במקביל זה בלגן.
+
+     הכפתור הוא מתג אמיתי: 🔊 = מנגן, 🔇 = כבוי. הבחירה נשמרת,
+     כך שאם הוא כיבה בברכה — הספירה לא תדליק לו שוב. */
+  var MUSIC_KEY = 'omri40.music.v1';
+  var music = null, onScreen = false, gestureArmed = false;
+
+  function musicPref() {
+    try { return localStorage.getItem(MUSIC_KEY) !== 'off'; } catch (e) { return true; }
+  }
+
+  function setMusicPref(on) {
+    try { localStorage.setItem(MUSIC_KEY, on ? 'on' : 'off'); } catch (e) {}
+  }
 
   function musicEl() {
     if (music) return music;
@@ -125,46 +137,65 @@
     music.loop = true;
     music.preload = 'auto';
     music.volume = typeof m.volume === 'number' ? m.volume : 1;
+    music.addEventListener('play', paintMusicBtn);
+    music.addEventListener('pause', paintMusicBtn);
     return music;
   }
 
-  /* iOS לא מנגן קול בלי מחווה של המשתמש. play() מחזיר Promise
-     שנדחה במקרה כזה — ואז נתלים על הנגיעה הבאה, איפה שתהיה. */
-  function musicTry() {
+  /* הכפתור מספר את האמת על מה שקורה עכשיו, לא על מה שביקשנו:
+     ב-iOS אפשר לבקש ניגון ולקבל סירוב, ואז 🔊 היה משקר. */
+  function paintMusicBtn() {
+    var m = CONFIG.music || {};
+    var playing = !!(music && !music.paused);
+    el.musicBtn.textContent = playing ? '🔊' : '🔇';
+    el.musicBtn.classList.toggle('off', !playing);
+    el.musicBtn.setAttribute('aria-label', playing ? (m.offHint || 'כבה מוזיקה')
+                                                   : (m.onHint || 'הפעל מוזיקה'));
+    el.musicBtn.setAttribute('aria-pressed', playing ? 'true' : 'false');
+  }
+
+  function musicPlay() {
     var a = musicEl();
-    if (!a || !musicWanted) return;
+    if (!a) return;
     var p = a.play();
+    // iOS לא מנגן קול בלי מחווה של המשתמש. אם נחסמנו — נתלים על
+    // הנגיעה הבאה, איפה שתהיה, וגם משאירים את 🔇 מהבהב בפינה.
     if (p && p.catch) p.catch(armGesture);
   }
 
   function armGesture() {
-    if (!musicWanted) return;
-    el.musicBtn.classList.remove('hidden');
+    paintMusicBtn();
     if (gestureArmed) return;
     gestureArmed = true;
     var once = function () {
       document.removeEventListener('pointerdown', once, true);
       gestureArmed = false;
-      if (!musicWanted || !music || !music.paused) return;
-      var p = music.play();
-      if (p && p.then) p.then(hideMusicBtn, armGesture);
-      else hideMusicBtn();
+      if (!onScreen || !musicPref() || !music || !music.paused) return;
+      musicPlay();
     };
     document.addEventListener('pointerdown', once, true);
   }
 
-  function hideMusicBtn() { el.musicBtn.classList.add('hidden'); }
-
   function musicOn() {
-    if (musicWanted) return;   // כבר מנגן — לא לאתחל מחדש במעבר מסך
-    musicWanted = true;
-    musicTry();
+    if (!CONFIG.music || !CONFIG.music.src) return;
+    onScreen = true;
+    el.musicBtn.classList.remove('hidden');
+    if (musicPref() && (!music || music.paused)) musicPlay();
+    paintMusicBtn();
   }
 
   function musicOff() {
-    musicWanted = false;
-    hideMusicBtn();
+    onScreen = false;
+    el.musicBtn.classList.add('hidden');
     if (music) music.pause();
+  }
+
+  function musicToggle() {
+    var a = musicEl();
+    if (!a) return;
+    if (a.paused) { setMusicPref(true); musicPlay(); }
+    else { setMusicPref(false); a.pause(); }
+    paintMusicBtn();
   }
 
   function show(name) {
@@ -830,16 +861,11 @@
       el.input.focus();
     });
 
-    el.musicBtn.title = (CONFIG.music && CONFIG.music.hint) || '';
     el.musicBtn.addEventListener('click', function (e) {
       // הכפתור יושב מחוץ לכרטיס הברכה, אבל עדיין עוצרים —
-      // נגיעה כאן היא בקשה למוזיקה, לא דילוג קדימה.
+      // נגיעה כאן היא החלטה על הקול, לא דילוג קדימה.
       e.stopPropagation();
-      musicWanted = true;
-      var a = musicEl();
-      if (!a) return;
-      var p = a.play();
-      if (p && p.then) p.then(hideMusicBtn, function () {}); else hideMusicBtn();
+      musicToggle();
     });
 
     el.replayBtn.addEventListener('click', function () { openSheet('replay'); });

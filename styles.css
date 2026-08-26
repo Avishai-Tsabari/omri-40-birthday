@@ -307,9 +307,14 @@ body{
   font-size: 20px;
   line-height: 1;
   cursor: pointer;
-  animation: musicPulse 2s ease-in-out infinite;
+  transition: opacity .2s ease;
 }
 .music-btn:active { transform: scale(.94); }
+
+/* כשהמוזיקה מנגנת הכפתור מתאפק. כשהיא כבויה — הוא מהבהב,
+   כי זה גם המצב שבו iOS חסם אותנו ורוצים שהוא ישים לב. */
+.music-btn.off { animation: musicPulse 2s ease-in-out infinite; }
+.music-btn:not(.off) { opacity: .55; }
 
 @keyframes musicPulse {
   0%, 100% { box-shadow: 0 0 0 0 rgba(255,255,255,.18); }
