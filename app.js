@@ -779,6 +779,7 @@
         state.greeted = false;
         state.route = null;
         strikes = 0;
+        setMusicPref(true);
         save();
         renderProgress();
         el.input.value = '';
@@ -826,7 +827,12 @@
     /* ?reset=1 מאפס הכל וחוזר לברכה — קיצור לבדיקות.
        מנקים את הכתובת מיד אחרי, כדי שרענון לא יאפס שוב באמצע המשחק. */
     if (/[?&]reset=1(&|$)/.test(location.search)) {
-      try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+        // גם העדפת הקול. היא נשמרת לכל הדומיין, ובלעדיה טאב אחד
+        // שכיבה את המוזיקה משפיע על כל פתיחה חדשה — כולל "איפוס".
+        localStorage.removeItem(MUSIC_KEY);
+      } catch (e) {}
       // מסירים רק את reset ומשאירים פרמטרים אחרים (למשל skip=1),
       // אחרת רענון היה מאבד את הדילוג על הספירה
       var rest = location.search.replace(/([?&])reset=1(&|$)/, '$1').replace(/[?&]$/, '');
