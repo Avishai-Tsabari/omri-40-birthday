@@ -120,7 +120,7 @@
      כך שאם הוא כיבה בברכה — הספירה לא תדליק לו שוב. */
   var MUSIC_KEY = 'omri40.music.v1';
   var music = null, onScreen = false, gestureArmed = false;
-  var queue = [], qi = 0, prefetch = null, failures = 0;
+  var queue = [], qi = 0, prefetch = null, failures = 0, switching = false;
 
   /* סדר הניגון נקבע פעם אחת בפתיחת הדף, לא בכל שיר — אחרת ערבוב
      יכול להגריל את אותו שיר פעמיים ברצף. */
@@ -136,11 +136,23 @@
     return list;
   }
 
+  /* החלפת שיר: קובעים src, טוענים, ומנגנים רק כשיש מה לנגן.
+     play() מיד אחרי החלפת src נדחה ב-AbortError ("הבקשה הופרעה
+     על ידי טעינה חדשה") — וזה בדיוק מה שעצר את המוזיקה אחרי
+     השיר הראשון. */
   function nextTrack() {
     if (!music || queue.length < 2) return;
     qi = (qi + 1) % queue.length;
+    var resume = onScreen && musicPref();
+    switching = resume;   // מונע הבהוב של 🔇 בין השירים
     music.src = queue[qi];
-    if (onScreen && musicPref()) musicPlay();
+    music.load();
+    if (!resume) { switching = false; return; }
+    var go = function () {
+      music.removeEventListener('canplay', go);
+      musicPlay();
+    };
+    music.addEventListener('canplay', go);
   }
 
   /* טוענים מראש רק את השיר הבא, ורק אחרי שהנוכחי כבר מנגן. */
@@ -171,7 +183,9 @@
     music.volume = typeof m.volume === 'number' ? m.volume : 1;
     music.addEventListener('play', paintMusicBtn);
     music.addEventListener('pause', paintMusicBtn);
-    music.addEventListener('playing', function () { failures = 0; prefetchNext(); });
+    music.addEventListener('playing', function () {
+      failures = 0; switching = false; prefetchNext(); paintMusicBtn();
+    });
     music.addEventListener('ended', nextTrack);
     // שיר שלא נטען לא יעצור את הערב — מדלגים לבא. הבלם הוא
     // failures: אם *כל* השירים נופלים, לא נסתובב בלולאה אינסופית.
@@ -185,7 +199,7 @@
      ב-iOS אפשר לבקש ניגון ולקבל סירוב, ואז 🔊 היה משקר. */
   function paintMusicBtn() {
     var m = CONFIG.music || {};
-    var playing = !!(music && !music.paused);
+    var playing = switching || !!(music && !music.paused);
     el.musicBtn.textContent = playing ? '🔊' : '🔇';
     el.musicBtn.classList.toggle('off', !playing);
     el.musicBtn.setAttribute('aria-label', playing ? (m.offHint || 'כבה מוזיקה')
@@ -199,7 +213,11 @@
     var p = a.play();
     // iOS לא מנגן קול בלי מחווה של המשתמש. אם נחסמנו — נתלים על
     // הנגיעה הבאה, איפה שתהיה, וגם משאירים את 🔇 מהבהב בפינה.
-    if (p && p.catch) p.catch(armGesture);
+    // רק NotAllowedError אומר "הדפדפן דורש מחווה". AbortError הוא
+    // רעש של החלפת שיר, ואין סיבה להבהיל אותו עם 🔇 בגללו.
+    if (p && p.catch) p.catch(function (err) {
+      if (!err || err.name === 'NotAllowedError') { switching = false; armGesture(); }
+    });
   }
 
   function armGesture() {
