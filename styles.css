@@ -118,7 +118,12 @@ body{
   margin:0 0 1.4rem; text-align:center; color:var(--muted);
   font-size:.8rem; font-weight:700; letter-spacing:.2em;
 }
-.cd-grid{display:flex; justify-content:center; gap:.5rem}
+.cd-grid{
+  display:flex; justify-content:center; gap:.5rem;
+  /* שעון נקרא משמאל לימין גם בעברית: שעות, דקות, שניות.
+     בלי זה ה-RTL של הדף היה הופך את הסדר לשניות-דקות-שעות. */
+  direction:ltr;
+}
 .cd-cell{
   flex:1 1 0; min-width:0; padding:.85rem .3rem; text-align:center;
   background:rgba(0,0,0,.35); border:1px solid var(--line); border-radius:.85rem;
