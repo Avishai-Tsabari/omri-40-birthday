@@ -121,6 +121,7 @@
   var MUSIC_KEY = 'omri40.music.v1';
   var music = null, onScreen = false, gestureArmed = false;
   var queue = [], qi = 0, prefetch = null, failures = 0, switching = false;
+  var lastMusicGesture = 0;
 
   /* סדר הניגון נקבע פעם אחת בפתיחת הדף, לא בכל שיר — אחרת ערבוב
      יכול להגריל את אותו שיר פעמיים ברצף.
@@ -232,6 +233,7 @@
       document.removeEventListener('pointerdown', once, true);
       gestureArmed = false;
       if (!onScreen || !musicPref() || !music || !music.paused) return;
+      lastMusicGesture = new Date().getTime();
       musicPlay();
     };
     document.addEventListener('pointerdown', once, true);
@@ -314,6 +316,10 @@
 
     var done = function () {
       if (!greetTimer) return;
+      /* ב-iOS אין קול עד הנגיעה הראשונה. אם הנגיעה הזו היא שהדליקה
+         את המוזיקה — היא לא מדלגת גם על הברכה, אחרת השיר היה מתחיל
+         בדיוק ברגע שהמסך שאמור להתלוות אליו נעלם. */
+      if (new Date().getTime() - lastMusicGesture < 600) return;
       clearTimeout(greetTimer);
       greetTimer = null;
       el.screenGreeting.removeEventListener('click', done);
