@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a0710">
+<title>חפש את המטמון</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css?v=9">
+</head>
+<body>
+
+<div class="grain" aria-hidden="true"></div>
+
+<main class="shell">
+
+  <header class="head">
+    <h1 id="title" class="title">חפש את המטמון</h1>
+    <p class="subtitle" id="subtitle"></p>
+    <div class="progress" id="progress" aria-label="התקדמות"></div>
+  </header>
+
+  <!-- ── ברכה מונפשת (בוקר יום ההולדת) ───────────────── -->
+  <section class="card greeting hidden" id="screen-greeting">
+    <div class="confetti" id="confetti" aria-hidden="true"></div>
+    <p class="g-hello" id="g-hello"></p>
+    <div class="g-big" id="g-big"></div>
+    <p class="g-line1" id="g-line1"></p>
+    <p class="g-line2" id="g-line2"></p>
+    <p class="g-line3" id="g-line3"></p>
+  </section>
+
+  <!-- ── ספירה לאחור ─────────────────────────────────── -->
+  <section class="card hidden" id="screen-countdown">
+    <p class="cd-label" id="cd-label"></p>
+    <div class="cd-grid" id="cd-grid"></div>
+    <button class="btn hidden" id="cd-open" type="button"></button>
+  </section>
+
+  <!-- ── מסך הזנת קוד ────────────────────────────────── -->
+  <section class="card" id="screen-code">
+    <p class="lede">האחיין מסר לך קוד.<br>הזן אותו כאן.</p>
+    <form id="code-form" autocomplete="off">
+      <input id="code-input" class="code-input" type="text"
+             inputmode="text" enterkeyhint="go"
+             autocapitalize="off" autocorrect="off" spellcheck="false"
+             aria-label="קוד">
+      <button class="btn" type="submit" id="submit-btn">פתח את התיק</button>
+    </form>
+    <p class="error" id="error" role="alert" aria-live="assertive"></p>
+  </section>
+
+  <!-- ── מסך סרטון ───────────────────────────────────── -->
+  <section class="card hidden" id="screen-video">
+    <p class="villain-tag" id="villain-tag"></p>
+    <div class="stage" id="stage">
+      <video id="video" playsinline preload="auto"></video>
+      <button class="play" id="play-btn" type="button">
+        <span class="play-icon" aria-hidden="true"></span>
+        <span class="play-label">נגן את ההודעה</span>
+      </button>
+    </div>
+    <p class="fallback hidden" id="fallback"></p>
+    <p class="video-caption hidden" id="video-caption"></p>
+    <button class="btn ghost hidden" id="skip-btn" type="button">דלג לרמז</button>
+  </section>
+
+  <!-- ── מסך התחנה הבאה ──────────────────────────────── -->
+  <section class="card hidden" id="screen-next">
+    <p class="next-label" id="next-label">התחנה הבאה</p>
+    <h2 class="place" id="place"></h2>
+    <p class="speech" id="speech"></p>
+    <p class="hint" id="hint"></p>
+    <button class="btn" id="continue-btn" type="button">קיבלתי קוד חדש</button>
+  </section>
+
+  <!-- ── מסך סיום ────────────────────────────────────── -->
+  <section class="card hidden finale" id="screen-finale">
+    <div class="bat" aria-hidden="true">🦇</div>
+    <h2 class="place" id="finale-place"></h2>
+    <p class="speech" id="finale-speech"></p>
+    <div id="gift" class="gift hidden">
+      <h3 id="gift-headline"></h3>
+      <p id="gift-body"></p>
+      <img id="gift-image" class="gift-image hidden" alt="">
+    </div>
+    <p class="hint" id="finale-hint"></p>
+  </section>
+
+  <footer class="foot">
+    <button class="link" id="replay-btn" type="button" hidden>הודעות קודמות</button>
+  </footer>
+
+</main>
+
+<!-- ── תפריט חירום (לחיצה ארוכה על הכותרת) ─────────────── -->
+<div class="sheet hidden" id="sheet">
+  <div class="sheet-box">
+    <p class="sheet-title" id="sheet-title">תפריט מפעיל</p>
+    <div id="sheet-list"></div>
+    <button class="btn ghost" id="sheet-close" type="button">סגור</button>
+  </div>
+</div>
+
+<script src="config.js?v=9"></script>
+<script src="app.js?v=9"></script>
+</body>
+</html>

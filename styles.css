@@ -1,0 +1,276 @@
+:root{
+  --bg:#0a0710;
+  --bg2:#140b1e;
+  --ink:#f3ecff;
+  --muted:#9a8bb4;
+  --acid:#7cff5c;
+  --acid-dim:#4ea337;
+  --blood:#ff3b5c;
+  --gold:#ffc94d;
+  --line:rgba(255,255,255,.10);
+  --card:rgba(255,255,255,.045);
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  background:
+    radial-gradient(120% 80% at 50% -10%, #2a0f3d 0%, transparent 60%),
+    radial-gradient(90% 60% at 90% 110%, #0d2a1a 0%, transparent 65%),
+    var(--bg);
+  color:var(--ink);
+  font-family:'Heebo', system-ui, -apple-system, 'Segoe UI', Arial, sans-serif;
+  -webkit-font-smoothing:antialiased;
+  min-height:100dvh;
+}
+
+/* גרעיניות עדינה — נותנת תחושת "שידור מוצפן" */
+.grain{
+  position:fixed; inset:0; pointer-events:none; z-index:0; opacity:.05;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.shell{
+  position:relative; z-index:1;
+  max-width:34rem; margin:0 auto;
+  min-height:100dvh;
+  padding:max(1.25rem, env(safe-area-inset-top)) 1.25rem
+          max(1.25rem, env(safe-area-inset-bottom));
+  display:flex; flex-direction:column; gap:1.5rem;
+}
+
+/* ── כותרת ─────────────────────────────── */
+.head{text-align:center; padding-top:.5rem}
+.title{
+  margin:0; font-size:clamp(2rem,10vw,2.9rem); font-weight:900;
+  letter-spacing:-.02em; line-height:1.05;
+  background:linear-gradient(180deg,#fff 0%, #c9a6ff 70%, #7a55b8 100%);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+  text-shadow:0 0 34px rgba(150,90,255,.35);
+  cursor:default; -webkit-user-select:none; user-select:none;
+}
+.subtitle{margin:.45rem 0 0; color:var(--muted); font-size:.9rem; letter-spacing:.03em}
+
+.progress{display:flex; gap:.4rem; justify-content:center; margin-top:1.1rem}
+.pip{
+  width:.55rem; height:.55rem; border-radius:50%;
+  background:rgba(255,255,255,.14);
+  transition:background .35s, box-shadow .35s, transform .35s;
+}
+.pip.done{background:var(--acid); box-shadow:0 0 12px var(--acid-dim)}
+.pip.current{background:var(--blood); box-shadow:0 0 14px var(--blood); transform:scale(1.35)}
+
+/* ── כרטיס ─────────────────────────────── */
+.card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:1.25rem;
+  padding:1.5rem 1.25rem;
+  backdrop-filter:blur(6px);
+  animation:rise .45s cubic-bezier(.2,.7,.3,1) both;
+}
+@keyframes rise{from{opacity:0; transform:translateY(14px)} to{opacity:1; transform:none}}
+.hidden{display:none !important}
+
+.lede{margin:0 0 1.1rem; text-align:center; font-size:1.05rem; line-height:1.6; color:#d9cdf0}
+
+/* ── ברכה מונפשת ───────────────────────── */
+.greeting{
+  position:relative; overflow:hidden; text-align:center;
+  padding-block:2.5rem;
+  border-color:rgba(255,201,77,.3);
+  background:linear-gradient(180deg, rgba(255,201,77,.10), rgba(255,255,255,.03));
+}
+.g-hello{
+  margin:0; font-size:1.15rem; color:#efe6d2; font-weight:700;
+  animation:fadeUp .7s .1s both;
+}
+.g-big{
+  margin:.4rem 0 .6rem; font-size:clamp(5rem,32vw,9rem); font-weight:900; line-height:.9;
+  background:linear-gradient(180deg,#fff5cf 0%, var(--gold) 45%, #b8791a 100%);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+  filter:drop-shadow(0 0 34px rgba(255,201,77,.45));
+  animation:pop .8s .3s cubic-bezier(.2,1.5,.4,1) both;
+}
+.g-line1{margin:0; font-size:1.6rem; font-weight:900; color:#fff;
+         animation:fadeUp .7s .9s both}
+.g-line2{margin:1.4rem 0 0; font-size:1.05rem; color:#e4dbf5;
+         animation:fadeUp .7s 1.5s both}
+.g-line3{margin:.35rem 0 0; font-size:1.05rem; color:var(--gold); font-weight:700;
+         animation:fadeUp .7s 2.1s both}
+@keyframes fadeUp{from{opacity:0; transform:translateY(12px)} to{opacity:1; transform:none}}
+@keyframes pop{from{opacity:0; transform:scale(.4) rotate(-8deg)} to{opacity:1; transform:none}}
+
+.confetti{position:absolute; inset:0; pointer-events:none}
+.confetti i{
+  position:absolute; top:-12%; width:.5rem; height:.85rem; border-radius:1px;
+  opacity:0; animation:fall linear infinite;
+}
+@keyframes fall{
+  0%{opacity:0; transform:translateY(-10%) rotate(0deg)}
+  8%{opacity:1}
+  100%{opacity:0; transform:translateY(760%) rotate(760deg)}
+}
+
+/* ── ספירה לאחור ───────────────────────── */
+.cd-label{
+  margin:0 0 1.4rem; text-align:center; color:var(--muted);
+  font-size:.8rem; font-weight:700; letter-spacing:.2em;
+}
+.cd-grid{display:flex; justify-content:center; gap:.5rem}
+.cd-cell{
+  flex:1 1 0; min-width:0; padding:.85rem .3rem; text-align:center;
+  background:rgba(0,0,0,.35); border:1px solid var(--line); border-radius:.85rem;
+}
+.cd-num{
+  font-size:clamp(1.6rem,9vw,2.4rem); font-weight:900; line-height:1;
+  color:var(--gold); font-variant-numeric:tabular-nums;
+}
+.cd-unit{margin-top:.35rem; font-size:.72rem; color:var(--muted); letter-spacing:.05em}
+.cd-ready .cd-num{color:var(--acid)}
+
+.video-caption{
+  margin:1rem 0 0; text-align:center;
+  font-size:1.3rem; font-weight:900; color:var(--blood);
+  letter-spacing:.02em;
+}
+
+/* ── קלט ───────────────────────────────── */
+.code-input{
+  width:100%; padding:.95rem 1rem;
+  font-family:inherit; font-size:1.35rem; font-weight:700; text-align:center;
+  letter-spacing:.06em;
+  color:var(--ink); background:rgba(0,0,0,.35);
+  border:1px solid var(--line); border-radius:.85rem;
+  outline:none; transition:border-color .2s, box-shadow .2s;
+}
+.code-input::placeholder{color:#6b5c85; font-weight:400; letter-spacing:normal}
+.code-input:focus{border-color:var(--acid); box-shadow:0 0 0 3px rgba(124,255,92,.14)}
+
+.btn{
+  width:100%; margin-top:.8rem; padding:1rem 1.25rem;
+  font-family:inherit; font-size:1.05rem; font-weight:700; color:#0a0710;
+  background:linear-gradient(180deg,#9dff86,#5fd943);
+  border:0; border-radius:.85rem; cursor:pointer;
+  transition:transform .12s, filter .2s;
+}
+.btn:active{transform:translateY(1px) scale(.995)}
+.btn:hover{filter:brightness(1.06)}
+.btn.ghost{
+  background:transparent; color:var(--muted);
+  border:1px solid var(--line); font-weight:400;
+}
+
+.error{
+  min-height:1.4rem; margin:.75rem 0 0; text-align:center;
+  color:var(--blood); font-size:.95rem; font-weight:700;
+}
+.shake{animation:shake .4s}
+@keyframes shake{
+  0%,100%{transform:translateX(0)} 20%{transform:translateX(-8px)}
+  40%{transform:translateX(8px)} 60%{transform:translateX(-5px)} 80%{transform:translateX(5px)}
+}
+
+/* ── סרטון ─────────────────────────────── */
+.villain-tag{
+  margin:0 0 .9rem; text-align:center; font-size:.8rem; font-weight:700;
+  letter-spacing:.22em; color:var(--blood);
+}
+.stage{
+  position:relative; width:100%; aspect-ratio:9/16; max-height:62dvh;
+  margin-inline:auto; border-radius:1rem; overflow:hidden;
+  background:#000 center/cover no-repeat;
+  border:1px solid var(--line);
+}
+.stage video{width:100%; height:100%; object-fit:contain; display:block; background:#000}
+.play{
+  position:absolute; inset:0; display:flex; gap:.7rem;
+  flex-direction:column; align-items:center; justify-content:center;
+  background:rgba(8,4,14,.55); border:0; cursor:pointer;
+  color:var(--ink); font-family:inherit; font-size:.95rem; font-weight:700;
+}
+.play-icon{
+  width:4.5rem; height:4.5rem; border-radius:50%;
+  background:var(--blood); box-shadow:0 0 40px rgba(255,59,92,.5);
+  display:grid; place-items:center;
+  animation:pulse 2s ease-in-out infinite;
+}
+/* משולש ניגון — מאפיינים פיזיים בכוונה, כדי שיצביע ימינה גם ב-RTL */
+.play-icon::after{
+  content:""; width:0; height:0;
+  border-top:.85rem solid transparent;
+  border-bottom:.85rem solid transparent;
+  border-left:1.35rem solid #fff;
+  margin-left:.4rem;
+}
+@keyframes pulse{50%{transform:scale(1.07)}}
+
+.fallback{
+  margin:1rem 0 0; padding:1rem; border-radius:.85rem;
+  background:rgba(0,0,0,.3); border:1px dashed var(--line);
+  color:#d9cdf0; line-height:1.7; font-size:1rem;
+}
+
+/* ── התחנה הבאה ────────────────────────── */
+.next-label{
+  margin:0 0 .4rem; text-align:center; font-size:.75rem; font-weight:700;
+  letter-spacing:.25em; color:var(--muted);
+}
+.place{
+  margin:0 0 1rem; text-align:center;
+  font-size:clamp(1.8rem,8vw,2.5rem); font-weight:900; line-height:1.15;
+  color:var(--gold); text-shadow:0 0 30px rgba(255,201,77,.3);
+}
+.speech{margin:0; font-size:1.08rem; line-height:1.8; color:#e4dbf5}
+.hint{margin:1.1rem 0 0; text-align:center; color:var(--muted); font-size:.92rem}
+
+/* ── סיום ──────────────────────────────── */
+.finale{
+  border-color:rgba(255,201,77,.35);
+  background:linear-gradient(180deg, rgba(255,201,77,.09), rgba(255,255,255,.03));
+}
+.bat{font-size:3.5rem; text-align:center; line-height:1; margin-bottom:.5rem;
+     filter:drop-shadow(0 0 22px rgba(255,201,77,.45))}
+.gift{
+  margin-top:1.4rem; padding:1.2rem; border-radius:1rem;
+  border:1px solid rgba(255,201,77,.35); background:rgba(255,201,77,.07);
+}
+.gift h3{margin:0 0 .5rem; color:var(--gold); font-size:1.25rem}
+.gift p{margin:0; line-height:1.75; color:#efe6d2}
+.gift-image{width:100%; margin-top:1rem; border-radius:.75rem; display:block}
+
+/* ── תחתית ─────────────────────────────── */
+.foot{margin-top:auto; display:flex; gap:1.25rem; justify-content:center; padding-top:.5rem}
+.link{
+  background:none; border:0; padding:.4rem;
+  color:#5d4f78; font-family:inherit; font-size:.82rem;
+  cursor:pointer; text-decoration:underline; text-underline-offset:3px;
+}
+.link:hover{color:var(--muted)}
+
+/* ── תפריט מפעיל ───────────────────────── */
+.sheet{
+  position:fixed; inset:0; z-index:10; display:grid; place-items:center;
+  background:rgba(4,2,8,.8); padding:1.25rem;
+}
+.sheet-box{
+  width:100%; max-width:22rem; padding:1.25rem;
+  background:var(--bg2); border:1px solid var(--line); border-radius:1.25rem;
+}
+.sheet-title{margin:0 0 .9rem; text-align:center; color:var(--muted);
+             font-size:.78rem; letter-spacing:.2em}
+.sheet-item{
+  width:100%; margin-bottom:.45rem; padding:.8rem 1rem; text-align:start;
+  background:rgba(255,255,255,.05); color:var(--ink);
+  border:1px solid var(--line); border-radius:.7rem;
+  font-family:inherit; font-size:.95rem; cursor:pointer;
+}
+.sheet-item:hover{background:rgba(255,255,255,.1)}
+.sheet-item.locked{opacity:.4}
+.sheet-item.danger{margin-top:.9rem; color:var(--blood); border-color:rgba(255,59,92,.3)}
+.sheet-empty{margin:.4rem 0 1rem; text-align:center; color:var(--muted); font-size:.9rem}
+
+@media (prefers-reduced-motion:reduce){
+  *{animation:none !important; transition:none !important}
+}
