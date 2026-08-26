@@ -123,13 +123,17 @@
   var queue = [], qi = 0, prefetch = null, failures = 0, switching = false;
 
   /* סדר הניגון נקבע פעם אחת בפתיחת הדף, לא בכל שיר — אחרת ערבוב
-     יכול להגריל את אותו שיר פעמיים ברצף. */
+     יכול להגריל את אותו שיר פעמיים ברצף.
+
+     השיר הראשון ב-tracks תמיד מנגן ראשון. הערבוב חל רק על השאר,
+     כי הרגע שבו עומרי פותח את הלינק בפעם הראשונה הוא רגע אחד
+     ואין עליו הגרלה. */
   function buildQueue() {
     var m = CONFIG.music || {};
     var list = (m.tracks || (m.src ? [m.src] : [])).slice();
     if (m.shuffle !== false) {
-      for (var i = list.length - 1; i > 0; i--) {
-        var j = Math.floor(Math.random() * (i + 1));
+      for (var i = list.length - 1; i > 1; i--) {
+        var j = 1 + Math.floor(Math.random() * i);
         var t = list[i]; list[i] = list[j]; list[j] = t;
       }
     }

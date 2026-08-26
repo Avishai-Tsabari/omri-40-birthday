@@ -61,12 +61,13 @@ const CONFIG = {
        רק השיר הראשון נטען מראש — הבא נטען בזמן שהנוכחי מתנגן,
        כדי שהברכה לא תחכה ל-12MB. שיר שלא נטען מדולג בשקט. */
     tracks: [
+      // ⚠️ הראשון ברשימה תמיד מנגן ראשון. הערבוב חל רק על השאר.
       'audio/eliad.mp3',   // אליעד — יום הולדת
       'audio/eden.mp3',    // להקת עדן — Happy Birthday
       'audio/berry.mp3',   // ברי סחרוף — Birthday (Infected Mushroom Remix)
       'audio/yaldut.mp3'   // ילדות ישראלית — היום יום הולדת
     ],
-    shuffle: true,
+    shuffle: true,       // מערבב מהשיר השני והלאה
     volume: 0.85,
     onHint: 'הפעל מוזיקה',
     offHint: 'כבה מוזיקה'
