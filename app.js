@@ -501,7 +501,8 @@
     // טעות. אחרי 3 ברצף — האחיין נכנס לתמונה.
     strikes++;
     el.input.value = '';
-    if (strikes >= (CONFIG.strikes.limit || 3)) {
+    // Math.max(1,...) — הגדרה של 0 עדיין אומרת "מיד", לא "אף פעם"
+    if (strikes >= Math.max(1, CONFIG.strikes.mistakesForVideo || 1)) {
       strikes = 0;
       go('#/wrong');
       return;
