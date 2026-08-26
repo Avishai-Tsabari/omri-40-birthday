@@ -22,7 +22,8 @@
     gLine1: $('g-line1'), gLine2: $('g-line2'), gLine3: $('g-line3'),
     screenCountdown: $('screen-countdown'), cdLabel: $('cd-label'),
     cdGrid: $('cd-grid'), cdOpen: $('cd-open'), cdSkip: $('cd-skip'),
-    screenTravel: $('screen-travel'), trTitle: $('tr-title'), trBody: $('tr-body'),
+    screenTravel: $('screen-travel'), trPin: $('tr-pin'),
+    trTitle: $('tr-title'), trBody: $('tr-body'),
     trStatus: $('tr-status'), trOpen: $('tr-open'), trManual: $('tr-manual'),
     screenCode: $('screen-code'), form: $('code-form'), input: $('code-input'),
     submit: $('submit-btn'), error: $('error'),
@@ -969,6 +970,12 @@
     });
 
     wireLongPress(el.title, function () { openSheet('operator'); });
+
+    /* רשת הביטחון האחרונה של שער המיקום: לחיצה ארוכה על הסיכה 📍
+       חושפת מיד את "הגעתי לפארק". מיועד למקרה שה-GPS לא נכשל אלא
+       פשוט סוטה — אין שגיאה, אין כפתור, והוא עומד בפארק והאתר
+       מתעקש שהוא רחוק. לא לגלות לעומרי. */
+    wireLongPress(el.trPin, showManual);
 
     document.addEventListener('visibilitychange', musicResume);
 

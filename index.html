@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=36">
+<link rel="stylesheet" href="styles.css?v=37">
 </head>
 <body>
 
@@ -42,7 +42,8 @@
 
   <!-- ── שער ההגעה לפארק (גיאולוקציה) ────────────────── -->
   <section class="card hidden" id="screen-travel">
-    <div class="pin" aria-hidden="true">📍</div>
+    <!-- לחיצה ארוכה על הסיכה חושפת את כפתור ההגעה הידני -->
+    <div class="pin" id="tr-pin" aria-hidden="true">📍</div>
     <h2 class="place" id="tr-title"></h2>
     <p class="speech" id="tr-body"></p>
     <p class="tr-status" id="tr-status" aria-live="polite"></p>
@@ -118,7 +119,7 @@
   </div>
 </div>
 
-<script src="config.js?v=36"></script>
-<script src="app.js?v=36"></script>
+<script src="config.js?v=37"></script>
+<script src="app.js?v=37"></script>
 </body>
 </html>
