@@ -120,6 +120,38 @@
      כך שאם הוא כיבה בברכה — הספירה לא תדליק לו שוב. */
   var MUSIC_KEY = 'omri40.music.v1';
   var music = null, onScreen = false, gestureArmed = false;
+  var queue = [], qi = 0, prefetch = null, failures = 0;
+
+  /* סדר הניגון נקבע פעם אחת בפתיחת הדף, לא בכל שיר — אחרת ערבוב
+     יכול להגריל את אותו שיר פעמיים ברצף. */
+  function buildQueue() {
+    var m = CONFIG.music || {};
+    var list = (m.tracks || (m.src ? [m.src] : [])).slice();
+    if (m.shuffle !== false) {
+      for (var i = list.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var t = list[i]; list[i] = list[j]; list[j] = t;
+      }
+    }
+    return list;
+  }
+
+  function nextTrack() {
+    if (!music || queue.length < 2) return;
+    qi = (qi + 1) % queue.length;
+    music.src = queue[qi];
+    if (onScreen && musicPref()) musicPlay();
+  }
+
+  /* טוענים מראש רק את השיר הבא, ורק אחרי שהנוכחי כבר מנגן. */
+  function prefetchNext() {
+    if (queue.length < 2) return;
+    var src = queue[(qi + 1) % queue.length];
+    if (prefetch && prefetch.getAttribute('src') === src) return;
+    prefetch = new Audio();
+    prefetch.preload = 'auto';
+    prefetch.src = src;
+  }
 
   function musicPref() {
     try { return localStorage.getItem(MUSIC_KEY) !== 'off'; } catch (e) { return true; }
@@ -131,14 +163,21 @@
 
   function musicEl() {
     if (music) return music;
-    var m = CONFIG.music;
-    if (!m || !m.src) return null;
-    music = new Audio(m.src);
-    music.loop = true;
+    var m = CONFIG.music || {};
+    queue = buildQueue();
+    if (!queue.length) return null;
+    music = new Audio(queue[0]);
     music.preload = 'auto';
     music.volume = typeof m.volume === 'number' ? m.volume : 1;
     music.addEventListener('play', paintMusicBtn);
     music.addEventListener('pause', paintMusicBtn);
+    music.addEventListener('playing', function () { failures = 0; prefetchNext(); });
+    music.addEventListener('ended', nextTrack);
+    // שיר שלא נטען לא יעצור את הערב — מדלגים לבא. הבלם הוא
+    // failures: אם *כל* השירים נופלים, לא נסתובב בלולאה אינסופית.
+    music.addEventListener('error', function () {
+      if (++failures < queue.length) nextTrack();
+    });
     return music;
   }
 
@@ -177,7 +216,8 @@
   }
 
   function musicOn() {
-    if (!CONFIG.music || !CONFIG.music.src) return;
+    var m = CONFIG.music;
+    if (!m || (!m.src && !(m.tracks && m.tracks.length))) return;
     onScreen = true;
     el.musicBtn.classList.remove('hidden');
     if (musicPref() && (!music || music.paused)) musicPlay();
