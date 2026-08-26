@@ -58,9 +58,14 @@
 
   function digitsOnly(s) { return String(s).replace(/\D/g, ''); }
 
-  /* ברקוד ארוך שהוקלד בטלפון — מספיק שארבע הספרות האחרונות תואמות */
+  /* ברקוד ארוך שהוקלד בטלפון — מספיק שארבע הספרות האחרונות תואמות.
+     חל רק על קוד שהוא ספרות בלבד. קוד כמו "שרדר2018" הוא שם נבל ושנה,
+     לא ברקוד: בלי התנאי הזה "שרדר2018" היה פותח גם את "אגמן2018",
+     כי שתי השנים זהות. */
   function barcodeMatch(input, code) {
-    var a = digitsOnly(input), b = digitsOnly(code);
+    var a = digitsOnly(input), b = String(code);
+    if (!/^\d+$/.test(b)) return false;      // הקוד אינו ברקוד
+    if (!/^\d+$/.test(input.trim())) return false; // גם הקלט חייב להיות ספרות
     if (a.length < 4 || b.length < 4) return false;
     return a.slice(-4) === b.slice(-4);
   }
@@ -604,11 +609,22 @@
       el.mapLink.hidden = false;
     }
 
+    /* ?skip=1 מקדים את שעת ההתחלה, כך שהספירה כבר "בשלה" והכפתור
+       מופיע מיד. לבדיקות בלבד. הפרמטר נשאר בכתובת בכוונה, כדי
+       שרענון וניווט בין מסכים ימשיכו לדלג. */
+    if (/[?&]skip=1(&|$)/.test(location.search)) {
+      CONFIG.countdown.startsAt = '1970-01-01T00:00:00+03:00';
+    }
+
     /* ?reset=1 מאפס הכל וחוזר לברכה — קיצור לבדיקות.
        מנקים את הכתובת מיד אחרי, כדי שרענון לא יאפס שוב באמצע המשחק. */
     if (/[?&]reset=1(&|$)/.test(location.search)) {
       try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
-      if (history.replaceState) history.replaceState(null, '', location.pathname);
+      // מסירים רק את reset ומשאירים פרמטרים אחרים (למשל skip=1),
+      // אחרת רענון היה מאבד את הדילוג על הספירה
+      var rest = location.search.replace(/([?&])reset=1(&|$)/, '$1').replace(/[?&]$/, '');
+      if (rest === '?') rest = '';
+      if (history.replaceState) history.replaceState(null, '', location.pathname + rest);
     }
 
     load();
