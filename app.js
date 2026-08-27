@@ -587,12 +587,24 @@
     });
   }
 
-  /* סרטון האחיין שנפתח אחרי 3 טעויות ברצף */
+  /* סרטון האחיין שנפתח על טעות. מסתובב בין האחיינים כדי
+     שטעות שנייה ברצף לא תיראה כמו חזרה. */
+  var wrongIdx = 0;
+
+  function wrongVideoSrc(stop) {
+    if (stop && stop.wrongVideo) return stop.wrongVideo;
+    var s = CONFIG.strikes;
+    var list = s.videos && s.videos.length ? s.videos : [s.video];
+    var src = list[wrongIdx % list.length];
+    wrongIdx++;
+    return src;
+  }
+
   function openStrikeVideo() {
     var s = CONFIG.strikes;
     var stop = stops[Math.min(state.unlocked, stops.length - 1)];
     playClip({
-      src: (stop && stop.wrongVideo) || s.video,
+      src: wrongVideoSrc(stop),
       caption: s.caption,
       doneLabel: s.back,
       onDone: function () { go('#/code', true); }
