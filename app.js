@@ -483,8 +483,17 @@
     show('screenTravel');
 
     stopWatching();
-    if (CONFIG.testMode) showManual();
-    else manualTimer = setTimeout(showManual, (a.manualAfterSeconds || 45) * 1000);
+
+    /* במצב בדיקות מדלגים על הגיאו לגמרי: אין טעם לבקש
+       הרשאת מיקום כשבודקים מהסלון ולא מהפארק. כפתור
+       "הגעתי" מופיע מיד ומעביר לתחנה הבאה. */
+    if (CONFIG.testMode) {
+      el.trStatus.textContent = 'מצב בדיקות — דילוג על אימות המיקום';
+      showManual();
+      return;
+    }
+
+    manualTimer = setTimeout(showManual, (a.manualAfterSeconds || 45) * 1000);
 
     if (!navigator.geolocation) {
       el.trStatus.textContent = a.denied;
